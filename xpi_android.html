@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A6B72">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>XPI — Подбор гильз</title>
+<style>
+  :root {
+    --teal:     #1A6B72;
+    --teal-lt:  #E8F6F7;
+    --dark:     #1C2B3A;
+    --orange:   #D9600A;
+    --amber:    #8B5E00;
+    --amber-lt: #FEF8ED;
+    --blue:     #2F5597;
+    --blue-lt:  #E8EEF7;
+    --blue-mid: #D0DCF0;
+    --green:    #1A6B40;
+    --green-lt: #E8F5EE;
+    --grey:     #5A7A8A;
+    --cream:    #F8F5F0;
+    --white:    #FFFFFF;
+    --warn-bg:  #FEF0E6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+    padding-bottom: 24px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--dark);
+    color: white;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+  .header p  { font-size: 10px; color: var(--grey); margin-top: 2px; }
+  .teal-bar  { height: 3px; background: var(--teal); }
+
+  /* SECTIONS */
+  .section { margin: 12px 12px 0; }
+
+  .sec-header {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: white;
+    border-radius: 8px 8px 0 0;
+  }
+  .sec-teal   { background: var(--teal); }
+  .sec-amber  { background: var(--amber); }
+  .sec-blue   { background: var(--blue); }
+
+  .sec-body {
+    background: white;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* CABLE CARDS */
+  .cable-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    padding: 12px;
+    background: var(--cream);
+    align-items: center;
+  }
+  .cable-card {
+    background: white;
+    border: 1.5px solid var(--teal-lt);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .cable-card label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--teal);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .cable-card select {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+    background: transparent;
+    cursor: pointer;
+    padding: 2px 0;
+  }
+  .cable-info {
+    font-size: 10px;
+    color: var(--grey);
+    margin-top: 4px;
+  }
+  .arrow {
+    font-size: 20px;
+    color: var(--grey);
+    text-align: center;
+  }
+
+  /* RESULT ROWS */
+  .result-main {
+    text-align: center;
+    padding: 14px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .result-main.green { color: var(--green); background: var(--green-lt); }
+  .result-main.amber { color: var(--amber); background: var(--amber-lt); }
+  .result-main.orange { color: var(--orange); background: var(--warn-bg); }
+  .result-main.warn  { color: #B00000; background: #FFF0F0; font-size: 13px; }
+
+  .result-row {
+    border-top: 1px solid #f0f0f0;
+    padding: 10px 14px;
+  }
+  .result-row .rlabel {
+    font-size: 10px;
+    color: var(--grey);
+    margin-bottom: 3px;
+  }
+  .result-row .rvalue {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .rvalue.teal   { color: var(--teal); }
+  .rvalue.amber  { color: var(--amber); }
+  .rvalue.blue   { color: var(--blue); font-size: 18px; font-weight: 700; }
+  .rvalue.normal { color: var(--dark); }
+
+  /* POWER INPUTS */
+  .power-inputs { padding: 12px; background: var(--blue-lt); }
+  .inp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .inp-row:last-child { margin-bottom: 0; }
+  .inp-label {
+    font-size: 11px;
+    color: var(--grey);
+    min-width: 110px;
+  }
+  .inp-row input {
+    width: 90px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--blue-mid);
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue);
+    background: #FFFFF0;
+    text-align: center;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .inp-row input:focus { border-color: var(--blue); }
+  .inp-unit {
+    font-size: 11px;
+    color: var(--grey);
+  }
+
+  /* FOOTER */
+  .footer {
+    margin: 16px 12px 0;
+    text-align: center;
+    font-size: 10px;
+    color: var(--grey);
+  }
+
+  /* PWA install hint */
+  .install-hint {
+    margin: 8px 12px 0;
+    background: var(--dark);
+    color: #aaa;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .install-hint span { font-size: 18px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ПОДБОР ГИЛЬЗ И МУФТ · XPI</h1>
+  <p>Raychem · PI-TOOL-SET-xx · Chemelex</p>
+</div>
+<div class="teal-bar"></div>
+
+<!-- INSTALL HINT -->
+<div class="install-hint" id="installHint">
+  <span>💡</span>
+  <div>Добавь на рабочий стол: меню браузера → «Добавить на главный экран»</div>
+</div>
+
+<!-- 01: CABLE SELECTION -->
+<div class="section">
+  <div class="sec-header sec-teal">01 / ВЫБОР КАБЕЛЕЙ</div>
+  <div class="sec-body">
+    <div class="cable-grid">
+      <div class="cable-card">
+        <label>▼ КАБЕЛЬ 1 (ОТ)</label>
+        <select id="cb1"></select>
+        <div class="cable-info" id="info1">—</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="cable-card">
+        <label>▼ КАБЕЛЬ 2 (ДО)</label>
+        <select id="cb2"></select>
+        <div class="cable-info" id="info2">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 02: SLEEVE -->
+<div class="section">
+  <div class="sec-header sec-teal">02 / РЕЗУЛЬТАТ — ОСНОВНАЯ ГИЛЬЗА И НАБОР</div>
+  <div class="sec-body">
+    <div class="result-main green" id="r_sleeve">—</div>
+    <div class="result-row">
+      <div class="rlabel">Номер по каталогу</div>
+      <div class="rvalue normal" id="r_cat">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Обжимная матрица</div>
+      <div class="rvalue normal" id="r_mat">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Инструмент</div>
+      <div class="rvalue normal" id="r_tool">—</div>
+    </div>
+    <div class="result-row" style="background:#FEF0E6">
+      <div class="rlabel" style="color:var(--orange)">НАБОР / МУФТА</div>
+      <div class="rvalue orange" id="r_kit">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- 03: BRAID -->
+<div class="section">
+  <div class="sec-header sec-amber">03 / ГИЛЬЗА ДЛЯ ОПЛЁТКИ (входит в набор CS-150-xx-PI)</div>
+  <div class="sec-body">
+    <div class="result-main amber" id="r_braid">—</div>
+    <div class="result-row">
+      <div class="rlabel">Номер по каталогу</div>
+      <div class="rvalue amber" id="r_br_cat">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Матрица</div>
+      <div class="rvalue amber" id="r_br_mat">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Инструмент</div>
+      <div class="rvalue amber" id="r_br_tool">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- 04: POWER -->
+<div class="section">
+  <div class="sec-header sec-blue">04 / МОЩНОСТЬ НАГРЕВА — ВТ/М</div>
+  <div class="sec-body">
+    <div class="power-inputs">
+      <div class="inp-row">
+        <span class="inp-label">Напряжение</span>
+        <input type="number" id="voltage" value="230" min="1">
+        <span class="inp-unit">В</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Длина кабеля 1</span>
+        <input type="number" id="len1" value="1000" min="1">
+        <span class="inp-unit">м</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Длина кабеля 2</span>
+        <input type="number" id="len2" value="1000" min="1">
+        <span class="inp-unit">м</span>
+      </div>
+    </div>
+    <div class="result-row" style="background:var(--blue-mid)">
+      <div class="rlabel">Вт/м (кабель 1)</div>
+      <div class="rvalue blue" id="r_wm1">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Вт/м (кабель 2)</div>
+      <div class="rvalue normal" id="r_wm2">—</div>
+    </div>
+    <div class="result-row">
+      <div class="rlabel">Мощность цепи</div>
+      <div class="rvalue normal" id="r_pwr">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Raychem XPI · RAYCHEM-DS-EU1457-PITOOLSETxx-RU</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const CABLES = [
+  ["XPI-0.8",22.4,0.8],["XPI-1.1",16.1,1.1],["XPI-1.8",10.2,1.8],
+  ["XPI-2.9",5.9,2.9],["XPI-4.4",4.0,4.4],["XPI-7",2.5,7],
+  ["XPI-10",1.8,10],["XPI-11.7",1.5,11.7],["XPI-15",1.2,15],
+  ["XPI-17.8",1.0,17.8],["XPI-25",1.0,25],["XPI-31.5",1.6,31.5],
+  ["XPI-50",1.0,50],["XPI-65",0.8,65],["XPI-80",1.2,80],
+  ["XPI-100",1.5,100],["XPI-150",1.0,150],["XPI-200",0.8,200],
+  ["XPI-320",0.9,320],["XPI-380",0.8,380],["XPI-480",0.6,480],
+  ["XPI-600",0.5,600],["XPI-700",0.4,700],["XPI-810",0.6,810],
+  ["XPI-1000",0.5,1000],["XPI-1440",0.3,1440],["XPI-1750",0.3,1750],
+  ["XPI-2000",0.5,2000],["XPI-3000",0.3,3000],["XPI-4000",0.3,4000],
+  ["XPI-4400",0.3,4400],["XPI-5160",0.3,5160],["XPI-5600",0.2,5600],
+  ["XPI-7000",0.2,7000],["XPI-8000",0.1,8000],
+  ["XPI-S-0.8",22.4,0.8],["XPI-S-1.1",16.1,1.1],["XPI-S-1.8",10.2,1.8],
+  ["XPI-S-2.9",5.9,2.9],["XPI-S-4.4",4.0,4.4],["XPI-S-7",2.5,7],
+  ["XPI-S-10",1.8,10],["XPI-S-11.7",1.5,11.7],["XPI-S-15",1.2,15],
+  ["XPI-S-17.8",1.0,17.8],["XPI-S-25",1.0,25],["XPI-S-31.5",1.6,31.5],
+  ["XPI-S-50",1.0,50],["XPI-S-65",0.8,65],["XPI-S-80",1.2,80],
+  ["XPI-S-100",1.5,100],["XPI-S-150",1.0,150],["XPI-S-200",0.8,200],
+  ["XPI-S-320",0.9,320],["XPI-S-380",0.8,380],["XPI-S-480",0.6,480],
+  ["XPI-S-600",0.5,600],["XPI-S-700",0.4,700],["XPI-S-810",0.6,810],
+  ["XPI-S-1000",0.5,1000],["XPI-S-1440",0.3,1440],["XPI-S-1750",0.3,1750],
+  ["XPI-S-2000",0.5,2000],["XPI-S-3000",0.3,3000],["XPI-S-4000",0.3,4000],
+  ["XPI-S-4400",0.3,4400],["XPI-S-5160",0.3,5160],["XPI-S-5600",0.2,5600],
+  ["XPI-S-7000",0.2,7000],["XPI-S-8000",0.1,8000],
+];
+
+const CABLE_MAP = {};
+CABLES.forEach(c => CABLE_MAP[c[0]] = {section: c[1], r: c[2]});
+
+const BRAID = {
+  "CS-150-2.5-PI|XPI":  ["BR-CRP-2.5","1244-016304","CD-PI-02","PI-TOOL-01"],
+  "CS-150-2.5-PI|XPI-S":["BR-CRP-2.5","1244-016304","CD-PI-02","PI-TOOL-01"],
+  "CS-150-6-PI|XPI":    ["BR-CRP-6",  "1244-016305","CD-PI-03","PI-TOOL-02"],
+  "CS-150-6-PI|XPI-S":  ["BR-CRP-6",  "1244-016305","CD-PI-03","PI-TOOL-02"],
+  "CS-150-25-PI|XPI":   ["BR-CRP-25", "1244-016306","CD-PI-04","PI-TOOL-02"],
+  "CS-150-25-PI|XPI-S": ["BR-CRP-25", "1244-016306","CD-PI-04","PI-TOOL-02"],
+};
+
+// ═══════════════════════════════════════════════
+// LOGIC
+// ═══════════════════════════════════════════════
+function family(name) { return name.startsWith("XPI-S-") ? "XPI-S" : "XPI"; }
+function val(name)    { return parseFloat(name.replace("XPI-S-","").replace("XPI-","")); }
+function cond(name)   { return CABLE_MAP[name] ? CABLE_MAP[name].section : null; }
+
+function getSleeve(c1, c2) {
+  const v1=val(c1), v2=val(c2), f1=family(c1), f2=family(c2);
+  const cd1=cond(c1), cd2=cond(c2);
+  if (!cd1||!cd2) return null;
+  const s1=cd1<=2.5, s2=cd2<=2.5;
+
+  if (s1 && s2) {
+    const tiny = (v,f) => v>=65 || [380,480,600,700,810,1000,1440,1750,2000,3000,4000,4400,5160,5600,7000,8000].includes(v);
+    const med  = (v,f) => [11.7,15,17.8,25,50,80,150,320].includes(v) || (v===100 && ["XPI","XPI-S"].includes(f));
+    const ls   = (v,f) => [7,10,11.7,31.5].includes(v) || (v===100 && ["XPI","XPI-S"].includes(f));
+    const t1=tiny(v1,f1),t2=tiny(v2,f2),m1=med(v1,f1),m2=med(v2,f2),l1=ls(v1,f1),l2=ls(v2,f2);
+    if (t1&&t2)                          return ["PI-CRP-01N","1244-016256","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    if ((v1===11.7&&t2)||(t1&&v2===11.7)) return ["PI-CRP-02N","1244-016257","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    if (m1&&m2)                          return ["PI-CRP-03N","1244-016258","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    if ((l1&&t2)||(t1&&l2))              return ["PI-CRP-04", "1244-016259","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    if ((l1&&m2)||(m1&&l2))              return ["PI-CRP-05", "1244-016260","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    if (l1&&l2)                          return ["PI-CRP-06", "1244-016261","CD-PI-02","PI-TOOL-01","CS-150-2.5-PI"];
+    return null;
+  }
+
+  for (const [ca,cb] of [[c1,c2],[c2,c1]]) {
+    const va=val(ca), vb=val(cb), fb=family(cb);
+    if (va===4.4) {
+      if ([11.7,15].includes(vb)) return ["PI-CRP-07","1244-016262","CD-PI-03","PI-TOOL-02","CS-150-6-PI"];
+      if ([7,10].includes(vb))    return ["PI-CRP-08","1244-016263","CD-PI-03","PI-TOOL-02","CS-150-6-PI"];
+      if (vb===4.4)               return ["PI-CRP-09","1244-016264","CD-PI-03","PI-TOOL-02","CS-150-6-PI"];
+    }
+    if (va===2.9) {
+      if ([11.7,31.5].includes(vb)||(vb===100&&["XPI","XPI-S"].includes(fb))) return ["PI-CRP-10","1244-016265","CD-PI-04","PI-TOOL-02","CS-150-6-PI"];
+      if ([7,10].includes(vb))    return ["PI-CRP-11","1244-016266","CD-PI-04","PI-TOOL-02","CS-150-6-PI"];
+      if (vb===4.4)               return ["PI-CRP-12","1244-016267","CD-PI-04","PI-TOOL-02","CS-150-6-PI"];
+      if (vb===2.9)               return ["PI-CRP-13","1244-016268","CD-PI-04","PI-TOOL-02","CS-150-6-PI"];
+    }
+    if (va===1.8) {
+      if (vb===7)                 return ["PI-CRP-14","1244-016269","CD-PI-04","PI-TOOL-02","CS-150-25-PI"];
+      if ([7,4.4].includes(vb))   return ["PI-CRP-15","1244-016270","CD-PI-04","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===2.9)               return ["PI-CRP-16","1244-016271","CD-PI-04","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===1.8)               return ["PI-CRP-17","1244-016272","CD-PI-04","PI-TOOL-02","CS-150-25-PI"];
+    }
+    if (va===1.1) {
+      if (vb===4.4)               return ["PI-CRP-18","1244-016273","CD-PI-05","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===2.9)               return ["PI-CRP-19","1244-016274","CD-PI-05","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===1.8)               return ["PI-CRP-20","1244-016275","CD-PI-05","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===1.1)               return ["PI-CRP-21","1244-016276","CD-PI-05","PI-TOOL-02","CS-150-25-PI"];
+    }
+    if (va===0.8) {
+      if (vb===2.9)               return ["PI-CRP-22","1244-016277","CD-PI-06","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===1.8)               return ["PI-CRP-23","1244-016278","CD-PI-06","PI-TOOL-02","CS-150-25-PI"];
+      if (vb===1.1)               return ["PI-CRP-24","1244-016279","CD-PI-06","PI-TOOL-02","CS-150-25-PI"];
+    }
+  }
+  return null;
+}
+
+function compatFor(c1) {
+  return CABLES.map(c=>c[0]).filter(c2 => getSleeve(c1,c2) !== null);
+}
+
+// ═══════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════
+const cb1 = document.getElementById('cb1');
+const cb2 = document.getElementById('cb2');
+
+function populateCb1() {
+  cb1.innerHTML = '';
+  CABLES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c[0]; o.textContent = c[0];
+    cb1.appendChild(o);
+  });
+}
+
+function populateCb2(c1) {
+  const opts = compatFor(c1);
+  const prev = cb2.value;
+  cb2.innerHTML = '';
+  opts.forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name;
+    cb2.appendChild(o);
+  });
+  if (opts.includes(prev)) cb2.value = prev;
+}
+
+function setText(id, text) { document.getElementById(id).textContent = text||'—'; }
+
+function refresh() {
+  const c1 = cb1.value, c2 = cb2.value;
+  const d1 = CABLE_MAP[c1], d2 = CABLE_MAP[c2];
+
+  document.getElementById('info1').textContent = d1 ? `${d1.section} мм²  ·  ${d1.r} Ом/км` : '—';
+  document.getElementById('info2').textContent = d2 ? `${d2.section} мм²  ·  ${d2.r} Ом/км` : '—';
+
+  const sl = getSleeve(c1, c2);
+  const sleeveEl = document.getElementById('r_sleeve');
+  if (sl) {
+    sleeveEl.textContent = sl[0];
+    sleeveEl.className = 'result-main green';
+    setText('r_cat',  sl[1]);
+    setText('r_mat',  sl[2]);
+    setText('r_tool', sl[3]);
+    setText('r_kit',  sl[4]);
+
+    const bk = `${sl[4]}|${family(c1)}`;
+    const br = BRAID[bk];
+    if (br) {
+      document.getElementById('r_braid').textContent = br[0];
+      document.getElementById('r_braid').className = 'result-main amber';
+      setText('r_br_cat',  br[1]);
+      setText('r_br_mat',  br[2]);
+      setText('r_br_tool', br[3]);
+    } else {
+      document.getElementById('r_braid').textContent = '—';
+      ['r_br_cat','r_br_mat','r_br_tool'].forEach(id=>setText(id,'—'));
+    }
+  } else {
+    sleeveEl.textContent = '⚠ Нет совместимой гильзы';
+    sleeveEl.className = 'result-main warn';
+    ['r_cat','r_mat','r_tool','r_kit','r_braid','r_br_cat','r_br_mat','r_br_tool']
+      .forEach(id => setText(id,'—'));
+  }
+
+  // Power
+  const U  = parseFloat(document.getElementById('voltage').value)||0;
+  const L1 = parseFloat(document.getElementById('len1').value)||0;
+  const L2 = parseFloat(document.getElementById('len2').value)||0;
+  if (d1 && d2 && U && L1 && L2) {
+    const wm1 = (U*U*1000/(d1.r*L1*L1)).toFixed(1);
+    const wm2 = (U*U*1000/(d2.r*L2*L2)).toFixed(1);
+    const pwr = (U*U/(d1.r*L1 + d2.r*L2)).toFixed(2);
+    setText('r_wm1', `${wm1} Вт/м`);
+    setText('r_wm2', `${wm2} Вт/м`);
+    setText('r_pwr',  `${pwr} кВт`);
+  } else {
+    ['r_wm1','r_wm2','r_pwr'].forEach(id=>setText(id,'—'));
+  }
+}
+
+// Init
+populateCb1();
+populateCb2(cb1.value);
+refresh();
+
+cb1.addEventListener('change', () => { populateCb2(cb1.value); refresh(); });
+cb2.addEventListener('change', refresh);
+document.getElementById('voltage').addEventListener('input', refresh);
+document.getElementById('len1').addEventListener('input', refresh);
+document.getElementById('len2').addEventListener('input', refresh);
+
+// Hide install hint after 10s
+setTimeout(() => {
+  const h = document.getElementById('installHint');
+  if (h) h.style.display='none';
+}, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "XPI Подбор гильз Raychem",
+  "short_name": "XPI Гильзы",
+  "description": "Подбор обжимных гильз и муфт для греющих кабелей Raychem XPI и XPI-S",
+  "start_url": "/xpi-tool/",
+  "display": "standalone",
+  "background_color": "#1C2B3A",
+  "theme_color": "#1A6B72",
+  "orientation": "portrait",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
